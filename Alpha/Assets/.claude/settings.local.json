@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bash scripts/start-server.sh --project-dir \"D:\\\\project\\\\YongGo\\\\Alpha\")",
+      "Bash(date *)",
+      "Bash(powershell *)",
+      "Bash(dir D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat *)",
+      "Bash(dir *)",
+      "Bash(findstr textmeshpro *)",
+      "Bash(del \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs\" \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs.meta\")"
+    ]
+  }
+}

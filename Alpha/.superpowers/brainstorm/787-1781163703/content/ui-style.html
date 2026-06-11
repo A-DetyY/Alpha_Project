@@ -1,0 +1,83 @@
+<h2>聊天界面风格选择</h2>
+<p class="subtitle">这个聊天界面的整体视觉风格是什么？</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="wechat" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#ededed;border-radius:8px;padding:12px;font-size:13px;font-family:sans-serif;">
+        <div style="display:flex;align-items:flex-start;margin-bottom:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#aaa;flex-shrink:0;"></div>
+          <div style="background:#fff;border-radius:4px 12px 12px 12px;padding:8px 12px;margin-left:8px;max-width:160px;">你好，有什么我能帮你的吗？</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;justify-content:flex-end;margin-bottom:10px;">
+          <div style="background:#95ec69;border-radius:12px 4px 12px 12px;padding:8px 12px;margin-right:8px;max-width:160px;">我想了解一下你们的产品</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#07c160;flex-shrink:0;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;margin-bottom:4px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#aaa;flex-shrink:0;"></div>
+          <div style="background:#fff;border-radius:4px 12px 12px 12px;padding:8px 12px;margin-left:8px;max-width:160px;">好的，请问您想了解哪方面？</div>
+        </div>
+        <div style="display:flex;background:#fff;border-top:1px solid #ddd;padding:6px;margin-top:8px;border-radius:4px;">
+          <div style="flex:1;background:#f5f5f5;border-radius:4px;height:24px;"></div>
+          <div style="width:40px;height:24px;background:#07c160;border-radius:4px;margin-left:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 清爽实用风</h3>
+      <p>类似微信聊天，白色背景，绿色发送气泡，简洁清晰，易于阅读</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="dark" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a2e;border-radius:8px;padding:12px;font-size:13px;font-family:sans-serif;">
+        <div style="display:flex;align-items:flex-start;margin-bottom:10px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#7c4dff;flex-shrink:0;"></div>
+          <div style="background:#16213e;color:#e0e0e0;border-radius:4px 12px 12px 12px;padding:8px 12px;margin-left:8px;max-width:160px;">你好，有什么我能帮你的吗？</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;justify-content:flex-end;margin-bottom:10px;">
+          <div style="background:#7c4dff;color:#fff;border-radius:12px 4px 12px 12px;padding:8px 12px;margin-right:8px;max-width:160px;">我想了解一下你们的产品</div>
+          <div style="width:32px;height:32px;border-radius:50%;background:#0f3460;flex-shrink:0;"></div>
+        </div>
+        <div style="display:flex;align-items:flex-start;margin-bottom:4px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#7c4dff;flex-shrink:0;"></div>
+          <div style="background:#16213e;color:#e0e0e0;border-radius:4px 12px 12px 12px;padding:8px 12px;margin-left:8px;max-width:160px;">好的，请问您想了解哪方面？</div>
+        </div>
+        <div style="display:flex;background:#16213e;border-top:1px solid #333;padding:6px;margin-top:8px;border-radius:4px;">
+          <div style="flex:1;background:#0f3460;border-radius:4px;height:24px;"></div>
+          <div style="width:40px;height:24px;background:#7c4dff;border-radius:4px;margin-left:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 深色科技风</h3>
+      <p>深色背景配紫色主调，有科技感和游戏感，适合夜间使用</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="game" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:linear-gradient(135deg,#1a0a2e,#0d1b3e);border-radius:8px;padding:12px;font-size:13px;font-family:sans-serif;border:1px solid #4a2f7a;">
+        <div style="display:flex;align-items:flex-start;margin-bottom:10px;">
+          <div style="width:36px;height:36px;border-radius:4px;background:linear-gradient(135deg,#6a3fb5,#4a2f7a);flex-shrink:0;border:1px solid #9d6fe8;"></div>
+          <div style="background:rgba(106,63,181,0.3);color:#d4b8ff;border-radius:0 8px 8px 8px;padding:8px 12px;margin-left:8px;max-width:150px;border:1px solid #6a3fb5;">你好，有什么我能帮你的吗？</div>
+        </div>
+        <div style="display:flex;align-items:flex-start;justify-content:flex-end;margin-bottom:10px;">
+          <div style="background:rgba(0,180,220,0.3);color:#a0f0ff;border-radius:8px 0 8px 8px;padding:8px 12px;margin-right:8px;max-width:150px;border:1px solid #00b4dc;">我想了解一下你们的产品</div>
+          <div style="width:36px;height:36px;border-radius:4px;background:linear-gradient(135deg,#006a8e,#003d5c);flex-shrink:0;border:1px solid #00b4dc;"></div>
+        </div>
+        <div style="display:flex;background:rgba(0,0,0,0.4);border-top:1px solid #4a2f7a;padding:6px;margin-top:8px;border-radius:4px;">
+          <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:24px;border:1px solid #4a2f7a;"></div>
+          <div style="width:40px;height:24px;background:linear-gradient(135deg,#6a3fb5,#00b4dc);border-radius:4px;margin-left:6px;"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 游戏 RPG 风</h3>
+      <p>带有魔幻/科幻游戏感，半透明面板，发光边框，沉浸感强</p>
+    </div>
+  </div>
+
+</div>
