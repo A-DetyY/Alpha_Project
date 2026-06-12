@@ -3,7 +3,8 @@
     "references": [
         "Chat",
         "UnityEngine.TestRunner",
-        "UnityEditor.TestRunner"
+        "UnityEditor.TestRunner",
+        "Newtonsoft.Json"
     ],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],

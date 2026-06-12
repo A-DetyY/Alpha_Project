@@ -79,6 +79,102 @@ public static class ChatSceneBuilder
         SetProp(so, "userMessagePrefab",   userPrefab);
         so.ApplyModifiedProperties();
 
+        // ── ConfirmDialog ─────────────────────────────────────────────────────
+        GameObject dialogPanel = UIObj("ConfirmDialogPanel", canvasT);
+        Stretch(dialogPanel);
+        dialogPanel.AddComponent<Image>().color = new Color(0, 0, 0, 0.7f);
+
+        GameObject dialogBox = UIObj("DialogBox", dialogPanel.transform);
+        RectTransform dbRt = dialogBox.GetComponent<RectTransform>();
+        dbRt.anchorMin = dbRt.anchorMax = new Vector2(0.5f, 0.5f);
+        dbRt.pivot     = new Vector2(0.5f, 0.5f);
+        dbRt.sizeDelta = new Vector2(800, 300);
+        dialogBox.AddComponent<Image>().color = new Color(0.08f, 0.06f, 0.18f, 1f);
+
+        GameObject msgGO = UIObj("Message", dialogBox.transform);
+        RectTransform msgRt = msgGO.GetComponent<RectTransform>();
+        msgRt.anchorMin = new Vector2(0, 0.4f); msgRt.anchorMax = new Vector2(1, 1);
+        msgRt.offsetMin = new Vector2(20, 0);   msgRt.offsetMax = new Vector2(-20, -10);
+        TextMeshProUGUI msgTmp = msgGO.AddComponent<TextMeshProUGUI>();
+        msgTmp.fontSize  = 28; msgTmp.color = new Color(0.83f, 0.72f, 1f, 1f);
+        msgTmp.alignment = TextAlignmentOptions.Center;
+        msgTmp.enableWordWrapping = true;
+        if (font != null) msgTmp.font = font;
+
+        GameObject allowBtnGO = UIObj("AllowButton", dialogBox.transform);
+        RectTransform abRt = allowBtnGO.GetComponent<RectTransform>();
+        abRt.anchorMin = new Vector2(0.1f, 0.05f); abRt.anchorMax = new Vector2(0.45f, 0.38f);
+        abRt.offsetMin = abRt.offsetMax = Vector2.zero;
+        allowBtnGO.AddComponent<Image>().color = new Color(0.42f, 0.25f, 0.71f, 1f);
+        Button allowBtn = allowBtnGO.AddComponent<Button>();
+        GameObject allowTxtGO = UIObj("Text", allowBtnGO.transform);
+        Stretch(allowTxtGO);
+        TextMeshProUGUI allowTmp = allowTxtGO.AddComponent<TextMeshProUGUI>();
+        allowTmp.text = "允许"; allowTmp.fontSize = 28;
+        allowTmp.color = Color.white; allowTmp.alignment = TextAlignmentOptions.Center;
+        if (font != null) allowTmp.font = font;
+
+        GameObject denyBtnGO = UIObj("DenyButton", dialogBox.transform);
+        RectTransform dbRt2 = denyBtnGO.GetComponent<RectTransform>();
+        dbRt2.anchorMin = new Vector2(0.55f, 0.05f); dbRt2.anchorMax = new Vector2(0.9f, 0.38f);
+        dbRt2.offsetMin = dbRt2.offsetMax = Vector2.zero;
+        denyBtnGO.AddComponent<Image>().color = new Color(0.25f, 0.12f, 0.12f, 1f);
+        Button denyBtn = denyBtnGO.AddComponent<Button>();
+        GameObject denyTxtGO = UIObj("Text", denyBtnGO.transform);
+        Stretch(denyTxtGO);
+        TextMeshProUGUI denyTmp = denyTxtGO.AddComponent<TextMeshProUGUI>();
+        denyTmp.text = "拒绝"; denyTmp.fontSize = 28;
+        denyTmp.color = Color.white; denyTmp.alignment = TextAlignmentOptions.Center;
+        if (font != null) denyTmp.font = font;
+
+        GameObject confirmDialogGO = new GameObject("ConfirmDialog");
+        ConfirmDialog confirmDialog = confirmDialogGO.AddComponent<ConfirmDialog>();
+        SerializedObject cdSO = new SerializedObject(confirmDialog);
+        SetProp(cdSO, "panel",       dialogPanel);
+        SetProp(cdSO, "messageText", (Object)msgTmp);
+        SetProp(cdSO, "allowButton", (Object)allowBtn);
+        SetProp(cdSO, "denyButton",  (Object)denyBtn);
+        cdSO.ApplyModifiedProperties();
+        dialogPanel.SetActive(false);
+
+        // ── WebView Close Overlay ─────────────────────────────────────────────
+        GameObject wvOverlay = UIObj("WebViewCloseOverlay", canvasT);
+        Stretch(wvOverlay);
+        wvOverlay.AddComponent<Image>().color = new Color(0, 0, 0, 0);
+
+        GameObject wvBtnGO = UIObj("WebViewCloseButton", wvOverlay.transform);
+        RectTransform wvBtnRt = wvBtnGO.GetComponent<RectTransform>();
+        wvBtnRt.anchorMin = wvBtnRt.anchorMax = new Vector2(1, 1);
+        wvBtnRt.pivot     = new Vector2(1, 1);
+        wvBtnRt.anchoredPosition = new Vector2(-20, -20);
+        wvBtnRt.sizeDelta        = new Vector2(80, 80);
+        wvBtnGO.AddComponent<Image>().color = new Color(0.4f, 0.1f, 0.1f, 0.9f);
+        Button wvCloseBtn = wvBtnGO.AddComponent<Button>();
+        GameObject wvBtnTxtGO = UIObj("Text", wvBtnGO.transform);
+        Stretch(wvBtnTxtGO);
+        TextMeshProUGUI wvBtnTmp = wvBtnTxtGO.AddComponent<TextMeshProUGUI>();
+        wvBtnTmp.text = "X"; wvBtnTmp.fontSize = 36;
+        wvBtnTmp.color = Color.white; wvBtnTmp.alignment = TextAlignmentOptions.Center;
+        if (font != null) wvBtnTmp.font = font;
+        wvOverlay.SetActive(false);
+
+        // ── WebViewManager ────────────────────────────────────────────────────
+        GameObject wvManagerGO = new GameObject("WebViewManager");
+        WebViewManager webViewManager = wvManagerGO.AddComponent<WebViewManager>();
+        SerializedObject wvmSO = new SerializedObject(webViewManager);
+        SetProp(wvmSO, "closeOverlay", wvOverlay);
+        SetProp(wvmSO, "closeButton",  (Object)wvCloseBtn);
+        wvmSO.ApplyModifiedProperties();
+
+        // ── AiToolBridge ──────────────────────────────────────────────────────
+        GameObject bridgeGO = new GameObject("AiToolBridge");
+        AiToolBridge bridge = bridgeGO.AddComponent<AiToolBridge>();
+        SerializedObject bridgeSO = new SerializedObject(bridge);
+        SetProp(bridgeSO, "confirmDialog",  (Object)confirmDialog);
+        SetProp(bridgeSO, "chatManager",    (Object)chatManager);
+        SetProp(bridgeSO, "webViewManager", (Object)webViewManager);
+        bridgeSO.ApplyModifiedProperties();
+
         EditorSceneManager.SaveScene(
             UnityEngine.SceneManagement.SceneManager.GetActiveScene(),
             "Assets/Scenes/ChatScene.unity");

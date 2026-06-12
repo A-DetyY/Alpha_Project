@@ -1,43 +1,24 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
-[Serializable]
-public class ChatMessage
-{
-    public string role;
-    public string content;
-}
-
-[Serializable]
-class MessagesWrapper
-{
-    public string model;
-    public List<ChatMessage> messages;
-}
-
-[Serializable]
-class ResponseChoice
-{
-    public ChatMessage message;
-}
-
-[Serializable]
-class ApiResponse
-{
-    public ResponseChoice[] choices;
-}
-
 public class ClaudeApiClient
 {
-    const float Timeout = 30f;
+    const int   MaxToolCalls = 20;
+    const float Timeout      = 30f;
 
-    readonly string _url;
-    readonly string _key;
-    readonly string _model;
-    readonly List<ChatMessage> _history = new List<ChatMessage>();
+    readonly string        _url;
+    readonly string        _key;
+    readonly string        _model;
+    readonly List<JObject> _history  = new List<JObject>();
+    readonly JArray        _toolsDef = JArray.Parse(ToolDefinitions.AllToolsJson);
+
+    ToolDispatcher _dispatcher;
 
     public ClaudeApiClient()
     {
@@ -53,63 +34,129 @@ public class ClaudeApiClient
         _model = cfg.model;
     }
 
+    public void SetDispatcher(ToolDispatcher dispatcher) => _dispatcher = dispatcher;
+
     public IEnumerator SendCoroutine(string userMessage, Action<string> onReply)
     {
-        _history.Add(new ChatMessage { role = "user", content = userMessage });
+        _history.Add(new JObject { ["role"] = "user", ["content"] = userMessage });
 
-        var wrapper = new MessagesWrapper { model = _model, messages = _history };
-        string json = JsonUtility.ToJson(wrapper);
+        int    toolCallCount   = 0;
+        string accumulatedText = null;
 
-        byte[] bodyRaw = System.Text.Encoding.UTF8.GetBytes(json);
-        using var req = new UnityWebRequest(_url, "POST");
-        req.uploadHandler   = new UploadHandlerRaw(bodyRaw);
-        req.downloadHandler = new DownloadHandlerBuffer();
-        req.timeout         = (int)Timeout;
-        req.SetRequestHeader("Content-Type", "application/json");
-        req.SetRequestHeader("Authorization", "Bearer " + _key);
-
-        yield return req.SendWebRequest();
-
-        if (req.result == UnityWebRequest.Result.ConnectionError ||
-            req.result == UnityWebRequest.Result.DataProcessingError)
+        while (true)
         {
-            Debug.LogError("[ClaudeApiClient] Network error: " + req.error);
-            _history.RemoveAt(_history.Count - 1);
-            onReply("[网络连接失败，请检查网络]");
-            yield break;
-        }
+            var requestBody = new JObject
+            {
+                ["model"]      = _model,
+                ["max_tokens"] = 4096,
+                ["tools"]      = _toolsDef,
+                ["messages"]   = new JArray(_history)
+            };
 
-        if (req.responseCode >= 400)
-        {
-            Debug.LogError($"[ClaudeApiClient] HTTP {req.responseCode}: {req.downloadHandler.text}");
-            _history.RemoveAt(_history.Count - 1);
-            onReply($"[服务异常（HTTP {req.responseCode}），请稍后重试]");
-            yield break;
-        }
+            byte[] bodyRaw = Encoding.UTF8.GetBytes(requestBody.ToString(Formatting.None));
+            var req = new UnityWebRequest(_url, "POST");
+            req.uploadHandler   = new UploadHandlerRaw(bodyRaw);
+            req.downloadHandler = new DownloadHandlerBuffer();
+            req.timeout         = (int)Timeout;
+            req.SetRequestHeader("Content-Type",  "application/json");
+            req.SetRequestHeader("Authorization", "Bearer " + _key);
 
-        ApiResponse response;
-        try
-        {
-            response = JsonUtility.FromJson<ApiResponse>(req.downloadHandler.text);
-        }
-        catch (Exception e)
-        {
-            Debug.LogError("[ClaudeApiClient] JSON parse error: " + e.Message);
-            _history.RemoveAt(_history.Count - 1);
-            onReply("[响应解析失败，请稍后重试]");
-            yield break;
-        }
+            yield return req.SendWebRequest();
 
-        if (response?.choices == null || response.choices.Length == 0)
-        {
-            Debug.LogError("[ClaudeApiClient] Empty choices in response: " + req.downloadHandler.text);
-            _history.RemoveAt(_history.Count - 1);
-            onReply("[响应解析失败，请稍后重试]");
-            yield break;
-        }
+            string responseText = req.downloadHandler.text;
+            bool   netError     = req.result == UnityWebRequest.Result.ConnectionError ||
+                                  req.result == UnityWebRequest.Result.DataProcessingError;
+            long   statusCode   = req.responseCode;
+            req.Dispose();
 
-        string reply = response.choices[0].message.content;
-        _history.Add(new ChatMessage { role = "assistant", content = reply });
-        onReply(reply);
+            if (netError)
+            {
+                Debug.LogError("[ClaudeApiClient] Network error");
+                _history.RemoveAt(_history.Count - 1);
+                onReply("[网络连接失败，请检查网络]");
+                yield break;
+            }
+
+            if (statusCode >= 400)
+            {
+                Debug.LogError($"[ClaudeApiClient] HTTP {statusCode}: {responseText}");
+                _history.RemoveAt(_history.Count - 1);
+                onReply($"[服务异常（HTTP {statusCode}），请稍后重试]");
+                yield break;
+            }
+
+            JObject response;
+            try { response = JObject.Parse(responseText); }
+            catch (Exception e)
+            {
+                Debug.LogError("[ClaudeApiClient] JSON parse error: " + e.Message);
+                _history.RemoveAt(_history.Count - 1);
+                onReply("[响应解析失败，请稍后重试]");
+                yield break;
+            }
+
+            // OpenAI 格式：choices[0].message
+            JObject message = response["choices"]?[0]?["message"] as JObject;
+            if (message == null)
+            {
+                Debug.LogError("[ClaudeApiClient] Unexpected response: " + responseText);
+                _history.RemoveAt(_history.Count - 1);
+                onReply("[响应解析失败，请稍后重试]");
+                yield break;
+            }
+
+            // 收集文本
+            string textContent = message["content"]?.Type == JTokenType.String
+                ? message["content"].ToString()
+                : null;
+            if (!string.IsNullOrEmpty(textContent))
+                accumulatedText = accumulatedText == null ? textContent : accumulatedText + "\n" + textContent;
+
+            // 检查 tool_calls（OpenAI 格式）
+            JArray toolCalls = message["tool_calls"] as JArray;
+            if (toolCalls == null || toolCalls.Count == 0)
+            {
+                _history.Add(new JObject { ["role"] = "assistant", ["content"] = textContent ?? "" });
+                onReply(accumulatedText ?? "[无回复内容]");
+                yield break;
+            }
+
+            // 将含 tool_calls 的助手消息存入历史
+            _history.Add(new JObject
+            {
+                ["role"]       = "assistant",
+                ["content"]    = textContent,
+                ["tool_calls"] = toolCalls
+            });
+
+            // 逐个执行工具调用
+            foreach (var call in toolCalls)
+            {
+                if (toolCallCount >= MaxToolCalls)
+                {
+                    onReply("任务已超出工具调用上限（20次），请重新描述需求。");
+                    yield break;
+                }
+                toolCallCount++;
+
+                string callId    = call["id"]?.ToString() ?? "";
+                string toolName  = call["function"]?["name"]?.ToString() ?? "";
+                string inputJson = call["function"]?["arguments"]?.ToString() ?? "{}";
+
+                string toolResult = null;
+                if (_dispatcher != null)
+                    yield return _dispatcher.Dispatch(toolName, inputJson, r => toolResult = r);
+                else
+                    toolResult = "[error] ToolDispatcher 未初始化";
+
+                _history.Add(new JObject
+                {
+                    ["role"]         = "tool",
+                    ["tool_call_id"] = callId,
+                    ["content"]      = toolResult
+                });
+            }
+            // 继续循环，将工具结果带入下一轮请求
+        }
     }
 }

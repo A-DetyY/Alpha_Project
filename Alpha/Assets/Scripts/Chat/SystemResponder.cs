@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using UnityEngine;
 
 public class SystemResponder
 {
@@ -9,6 +8,11 @@ public class SystemResponder
     public SystemResponder()
     {
         _apiClient = new ClaudeApiClient();
+    }
+
+    public void SetDispatcher(ToolDispatcher dispatcher)
+    {
+        _apiClient.SetDispatcher(dispatcher);
     }
 
     public IEnumerator GetReplyCoroutine(string userMessage, Action<string> onReply)

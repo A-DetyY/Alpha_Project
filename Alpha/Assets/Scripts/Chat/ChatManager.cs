@@ -15,6 +15,7 @@ public class ChatManager : MonoBehaviour
 
     private SystemResponder _systemResponder;
     private UnityAction<string> _onSubmitHandler;
+    public SystemResponder GetSystemResponder() => _systemResponder;
 
     private void Awake()
     {
