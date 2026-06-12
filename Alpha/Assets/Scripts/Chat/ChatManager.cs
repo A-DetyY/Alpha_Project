@@ -51,14 +51,19 @@ public class ChatManager : MonoBehaviour
 
     private IEnumerator ShowSystemReply(string userMessage)
     {
-        yield return new WaitForSeconds(Random.Range(0.5f, 1.5f));
-        AddMessage(_systemResponder.GetReply(userMessage), systemMessagePrefab);
+        MessageItem thinking = AddMessage("思考中…", systemMessagePrefab);
+        string reply = null;
+        yield return _systemResponder.GetReplyCoroutine(userMessage, r => reply = r);
+        Destroy(thinking.gameObject);
+        AddMessage(reply, systemMessagePrefab);
     }
 
-    private void AddMessage(string text, GameObject prefab)
+    private MessageItem AddMessage(string text, GameObject prefab)
     {
-        Instantiate(prefab, messageContainer).GetComponent<MessageItem>().SetContent(text);
+        var item = Instantiate(prefab, messageContainer).GetComponent<MessageItem>();
+        item.SetContent(text);
         Canvas.ForceUpdateCanvases();
         scrollRect.normalizedPosition = Vector2.zero;
+        return item;
     }
 }

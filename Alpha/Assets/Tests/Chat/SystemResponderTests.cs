@@ -1,24 +1,25 @@
+using System.Collections;
 using NUnit.Framework;
+using UnityEngine.TestTools;
 
 public class SystemResponderTests
 {
     [Test]
-    public void GetReply_ReturnsNonEmptyString()
+    public void Constructor_DoesNotThrow()
     {
-        var responder = new SystemResponder();
-        string reply = responder.GetReply("你好");
-        Assert.IsNotNull(reply);
-        Assert.IsNotEmpty(reply);
+        // ApiConfig.asset 在 Edit Mode 测试中可能不存在，
+        // ClaudeApiClient 内部已用 Debug.LogError 降级处理，不抛出异常。
+        Assert.DoesNotThrow(() =>
+        {
+            var responder = new SystemResponder();
+        });
     }
 
     [Test]
-    public void GetReply_NeverThrowsOnRepeatedCalls()
+    public void GetReplyCoroutine_ReturnsNonNullEnumerator()
     {
         var responder = new SystemResponder();
-        Assert.DoesNotThrow(() =>
-        {
-            for (int i = 0; i < 100; i++)
-                responder.GetReply("test");
-        });
+        IEnumerator coroutine = responder.GetReplyCoroutine("测试消息", _ => { });
+        Assert.IsNotNull(coroutine);
     }
 }

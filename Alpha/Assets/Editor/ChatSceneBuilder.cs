@@ -355,7 +355,7 @@ public static class ChatSceneBuilder
         bubbleVLG.childForceExpandWidth  = true;
         bubbleVLG.childForceExpandHeight = false;
         bubbleVLG.childControlWidth      = true;
-        bubbleVLG.childControlHeight     = false;
+        bubbleVLG.childControlHeight     = true;
 
         ContentSizeFitter bubbleCSF = bubble.AddComponent<ContentSizeFitter>();
         bubbleCSF.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;

@@ -7,7 +7,9 @@
       "Bash(dir D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat *)",
       "Bash(dir *)",
       "Bash(findstr textmeshpro *)",
-      "Bash(del \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs\" \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs.meta\")"
+      "Bash(del \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs\" \"D:\\\\project\\\\YongGo\\\\Alpha\\\\Assets\\\\Scripts\\\\Chat\\\\FontDiagnostic.cs.meta\")",
+      "Bash(git -C \"D:/project/Alpha_Project/Alpha\" ls-files --others --exclude-standard .gitignore)",
+      "Bash(git -C \"D:/project/Alpha_Project/Alpha\" ls-files .gitignore)"
     ]
   }
 }
